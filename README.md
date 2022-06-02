@@ -1,8 +1,8 @@
 # Accessing SERVER using Skupper
 
-[![main](https://github.com/skupperproject/REPO/actions/workflows/main.yaml/badge.svg)](https://github.com/skupperproject/REPO/actions/workflows/main.yaml)
+[![main](https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml/badge.svg)](https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml)
 
-#### Use public cloud resources to process data from a private message broker
+#### Use public cloud resources to process data from a private SERVER
 
 
 This example is part of a [suite of examples][examples] showing the
@@ -273,13 +273,13 @@ install the server.
 _**Console for private:**_
 
 ~~~ shell
-kubectl apply -f server
+kubectl create deployment server --image docker.io/library/nginx
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ kubectl apply -f server
+$ kubectl create deployment server --image docker.io/library/nginx
 deployment.apps/server created
 ~~~
 
@@ -294,13 +294,13 @@ to check that the service appears after a moment.
 _**Console for private:**_
 
 ~~~ shell
-skupper expose deployment/server --port 8080
+skupper expose deployment/server --port 8080 --target-port 80
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ skupper expose deployment/server --port 8080
+$ skupper expose deployment/server --port 8080 --target-port 80
 deployment server exposed as server
 ~~~
 
@@ -315,7 +315,7 @@ _Sample output:_
 ~~~ console
 $ kubectl get service/server
 NAME     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
-broker   ClusterIP   10.100.58.95   <none>        5672/TCP   2s
+server   ClusterIP   10.100.58.95   <none>        5672/TCP   2s
 ~~~
 
 ## Step 9: Run CLIENT
@@ -325,13 +325,13 @@ In the public namespace, use `kubectl run` to run CLIENT.
 _**Console for public:**_
 
 ~~~ shell
-kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -s http://server:8080/
+kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -sf http://server:8080/
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -s http://server:8080/
+$ kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -sf http://server:8080/
 OUTPUT
 pod "client" deleted
 ~~~
@@ -378,7 +378,7 @@ the following commands.
 _**Console for private:**_
 
 ~~~ shell
-kubectl delete -f server
+kubectl delete deployment/server
 skupper delete
 ~~~
 

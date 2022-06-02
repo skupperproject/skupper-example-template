@@ -1,6 +1,6 @@
 title: Accessing SERVER using Skupper
 subtitle: Use public cloud resources to process data from a private SERVER
-github_actions_url: https://github.com/skupperproject/REPO/actions/workflows/main.yaml
+github_actions_url: https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml
 overview: |
   This example shows how you can use Skupper to access SERVER.
 sites:
@@ -23,7 +23,7 @@ steps:
       install the server.
     commands:
       private:
-        - run: kubectl apply -f server
+        - run: kubectl create deployment server --image docker.io/library/nginx
           output: deployment.apps/server created
   - title: Expose SERVER
     preamble: |
@@ -57,7 +57,7 @@ steps:
   - standard: cleaning_up
     commands:
       private:
-        - run: kubectl delete -f server
+        - run: kubectl delete deployment/server
         - run: skupper delete
       public:
         - run: skupper delete
