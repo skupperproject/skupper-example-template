@@ -1,6 +1,6 @@
-# Accessing a RabbitMQ message broker using Skupper
+# Accessing SERVER using Skupper
 
-[![main](https://github.com/skupperproject/skupper-example-rabbitmq/actions/workflows/main.yaml/badge.svg)](https://github.com/skupperproject/skupper-example-rabbitmq/actions/workflows/main.yaml)
+[![main](https://github.com/skupperproject/REPO/actions/workflows/main.yaml/badge.svg)](https://github.com/skupperproject/REPO/actions/workflows/main.yaml)
 
 #### Use public cloud resources to process data from a private message broker
 
@@ -23,27 +23,15 @@ across cloud providers, data centers, and edge sites.
 * [Step 4: Install Skupper in your namespaces](#step-4-install-skupper-in-your-namespaces)
 * [Step 5: Check the status of your namespaces](#step-5-check-the-status-of-your-namespaces)
 * [Step 6: Link your namespaces](#step-6-link-your-namespaces)
-* [Step 7: Deploy the message broker](#step-7-deploy-the-message-broker)
-* [Step 8: Expose the message broker](#step-8-expose-the-message-broker)
-* [Step 9: Run the client](#step-9-run-the-client)
+* [Step 7: Deploy SERVER](#step-7-deploy-server)
+* [Step 8: Expose SERVER](#step-8-expose-server)
+* [Step 9: Run CLIENT](#step-9-run-client)
 * [Accessing the web console](#accessing-the-web-console)
 * [Cleaning up](#cleaning-up)
 
 ## Overview
 
-This example shows how you can use Skupper to access a RabbitMQ
-broker at a remote site without exposing it to the public internet.
-
-It contains two services:
-
-* A RabbitMQ broker running in a private data center.  The broker
-  has a queue named "notifications".
-
-* A RabbitMQ client running in the public cloud.  It sends 10
-  messages to "notifications" and then receives them back.
-
-The example uses two Kubernetes namespaces, "private" and "public",
-to represent the private data center and public cloud.
+This example shows how you can use Skupper to access SERVER.
 
 ## Prerequisites
 
@@ -277,93 +265,74 @@ to use `sftp` or a similar tool to transfer the token securely.
 By default, tokens expire after a single use or 15 minutes after
 creation.
 
-## Step 7: Deploy the message broker
+## Step 7: Deploy SERVER
 
 In the private namespace, use the `kubectl apply` command to
-install the broker.
+install the server.
 
 _**Console for private:**_
 
 ~~~ shell
-kubectl apply -f broker
+kubectl apply -f server
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ kubectl apply -f broker
-deployment.apps/broker created
+$ kubectl apply -f server
+deployment.apps/server created
 ~~~
 
-## Step 8: Expose the message broker
+## Step 8: Expose SERVER
 
-In the private namespace, use `skupper expose` to expose the
-broker on the Skupper network.
+In the private namespace, use `skupper expose` to expose SERVER
+on the Skupper network.
 
-Then, in the public namespace, use `kubectl get service/broker`
+Then, in the public namespace, use `kubectl get service/server`
 to check that the service appears after a moment.
 
 _**Console for private:**_
 
 ~~~ shell
-skupper expose deployment/broker --port 5672
+skupper expose deployment/server --port 8080
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ skupper expose deployment/broker --port 5672
-deployment broker exposed as broker
+$ skupper expose deployment/server --port 8080
+deployment server exposed as server
 ~~~
 
 _**Console for public:**_
 
 ~~~ shell
-kubectl get service/broker
+kubectl get service/server
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ kubectl get service/broker
+$ kubectl get service/server
 NAME     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
 broker   ClusterIP   10.100.58.95   <none>        5672/TCP   2s
 ~~~
 
-## Step 9: Run the client
+## Step 9: Run CLIENT
 
-In the public namespace, use `kubectl run` to run the client.
+In the public namespace, use `kubectl run` to run CLIENT.
 
 _**Console for public:**_
 
 ~~~ shell
-kubectl run client --attach --rm --restart Never --image quay.io/skupper/rabbitmq-example-client -- broker 5672
+kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -s http://server:8080/
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ kubectl run client --attach --rm --restart Never --image quay.io/skupper/rabbitmq-example-client -- broker 5672
-Sent message 1
-Sent message 2
-Sent message 3
-Sent message 4
-Sent message 5
-Sent message 6
-Sent message 7
-Sent message 8
-Sent message 9
-Sent message 10
-Received message 1
-Received message 2
-Received message 3
-Received message 4
-Received message 5
-Received message 6
-Received message 7
-Received message 8
-Received message 9
-Received message 10
+$ kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -s http://server:8080/
+OUTPUT
 pod "client" deleted
 ~~~
 
@@ -409,7 +378,7 @@ the following commands.
 _**Console for private:**_
 
 ~~~ shell
-kubectl delete -f broker
+kubectl delete -f server
 skupper delete
 ~~~
 

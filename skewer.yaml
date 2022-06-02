@@ -1,20 +1,8 @@
-title: Accessing a RabbitMQ message broker using Skupper
+title: Accessing SERVER using Skupper
 subtitle: Use public cloud resources to process data from a private message broker
-github_actions_url: https://github.com/skupperproject/skupper-example-rabbitmq/actions/workflows/main.yaml
+github_actions_url: https://github.com/skupperproject/REPO/actions/workflows/main.yaml
 overview: |
-  This example shows how you can use Skupper to access a RabbitMQ
-  broker at a remote site without exposing it to the public internet.
-
-  It contains two services:
-
-  * A RabbitMQ broker running in a private data center.  The broker
-    has a queue named "notifications".
-
-  * A RabbitMQ client running in the public cloud.  It sends 10
-    messages to "notifications" and then receives them back.
-
-  The example uses two Kubernetes namespaces, "private" and "public",
-  to represent the private data center and public cloud.
+  This example shows how you can use Skupper to access SERVER.
 sites:
   public:
     kubeconfig: ~/.kube/config-public
@@ -29,66 +17,47 @@ steps:
   - standard: install_skupper_in_your_namespaces
   - standard: check_the_status_of_your_namespaces
   - standard: link_your_namespaces
-  - title: Deploy the message broker
+  - title: Deploy SERVER
     preamble: |
       In the private namespace, use the `kubectl apply` command to
-      install the broker.
+      install the server.
     commands:
       private:
-        - run: kubectl apply -f broker
-          output: deployment.apps/broker created
-  - title: Expose the message broker
+        - run: kubectl apply -f server
+          output: deployment.apps/server created
+  - title: Expose SERVER
     preamble: |
-      In the private namespace, use `skupper expose` to expose the
-      broker on the Skupper network.
+      In the private namespace, use `skupper expose` to expose SERVER
+      on the Skupper network.
 
-      Then, in the public namespace, use `kubectl get service/broker`
+      Then, in the public namespace, use `kubectl get service/server`
       to check that the service appears after a moment.
     commands:
       private:
-        - await: deployment/broker
-        - run: skupper expose deployment/broker --port 5672
-          output: deployment broker exposed as broker
+        - await: deployment/server
+        - run: skupper expose deployment/server --port 8080
+          output: deployment server exposed as server
       public:
-        - await: service/broker
-        - run: kubectl get service/broker
+        - await: service/server
+        - run: kubectl get service/server
           output: |
             NAME     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
             broker   ClusterIP   10.100.58.95   <none>        5672/TCP   2s
-  - title: Run the client
+  - title: Run CLIENT
     preamble: |
-      In the public namespace, use `kubectl run` to run the client.
+      In the public namespace, use `kubectl run` to run CLIENT.
     commands:
       public:
-        - await: service/broker
-        - run: kubectl run client --attach --rm --restart Never --image quay.io/skupper/rabbitmq-example-client -- broker 5672
+        - await: service/server
+        - run: kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -s http://server:8080/
           output: |
-            Sent message 1
-            Sent message 2
-            Sent message 3
-            Sent message 4
-            Sent message 5
-            Sent message 6
-            Sent message 7
-            Sent message 8
-            Sent message 9
-            Sent message 10
-            Received message 1
-            Received message 2
-            Received message 3
-            Received message 4
-            Received message 5
-            Received message 6
-            Received message 7
-            Received message 8
-            Received message 9
-            Received message 10
+            OUTPUT
             pod "client" deleted
   - standard: accessing_the_web_console
   - standard: cleaning_up
     commands:
       private:
-        - run: kubectl delete -f broker
+        - run: kubectl delete -f server
         - run: skupper delete
       public:
         - run: skupper delete
