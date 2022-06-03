@@ -315,7 +315,7 @@ _Sample output:_
 ~~~ console
 $ kubectl get service/server
 NAME     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
-server   ClusterIP   10.100.58.95   <none>        5672/TCP   2s
+server   ClusterIP   10.100.58.95   <none>        8080/TCP   2s
 ~~~
 
 ## Step 9: Run CLIENT
@@ -325,13 +325,13 @@ In the public namespace, use `kubectl run` to run CLIENT.
 _**Console for public:**_
 
 ~~~ shell
-kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -sf http://server:8080/
+kubectl run client --attach --rm --image docker.io/curlimages/curl --restart Never -- -sf http://server:8080/
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -sf http://server:8080/
+$ kubectl run client --attach --rm --image docker.io/curlimages/curl --restart Never -- -sf http://server:8080/
 OUTPUT
 pod "client" deleted
 ~~~

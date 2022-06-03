@@ -42,14 +42,14 @@ steps:
         - run: kubectl get service/server
           output: |
             NAME     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
-            server   ClusterIP   10.100.58.95   <none>        5672/TCP   2s
+            server   ClusterIP   10.100.58.95   <none>        8080/TCP   2s
   - title: Run CLIENT
     preamble: |
       In the public namespace, use `kubectl run` to run CLIENT.
     commands:
       public:
         - await: service/server
-        - run: kubectl run client --attach --rm --image=docker.io/curlimages/curl --restart=Never -- -sf http://server:8080/
+        - run: kubectl run client --attach --rm --image docker.io/curlimages/curl --restart Never -- -sf http://server:8080/
           output: |
             OUTPUT
             pod "client" deleted
