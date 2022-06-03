@@ -1,6 +1,6 @@
 title: Accessing SERVER using Skupper
-subtitle: Use public cloud resources to process data from a private SERVER
-github_actions_url: https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml
+subtitle: Securely connect to SERVER on a remote Kubernetes cluster
+github_actions_url: https://github.com/skupperproject/REPO/actions/workflows/main.yaml
 overview: |
   This example shows how you can use Skupper to access SERVER.
 sites:
