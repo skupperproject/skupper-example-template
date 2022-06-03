@@ -273,13 +273,13 @@ install the server.
 _**Console for private:**_
 
 ~~~ shell
-kubectl create deployment server --image docker.io/library/nginx
+kubectl apply -f server/kubernetes.yaml
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ kubectl create deployment server --image docker.io/library/nginx
+$ kubectl apply -f server/kubernetes.yaml
 deployment.apps/server created
 ~~~
 
@@ -325,13 +325,13 @@ In the public namespace, use `kubectl run` to run CLIENT.
 _**Console for public:**_
 
 ~~~ shell
-kubectl run client --attach --rm --image docker.io/curlimages/curl --restart Never -- -sf http://server:8080/
+kubectl run client --attach --rm --image docker.io/library/nginx --restart Never -- curl -sf http://server:8080/
 ~~~
 
 _Sample output:_
 
 ~~~ console
-$ kubectl run client --attach --rm --image docker.io/curlimages/curl --restart Never -- -sf http://server:8080/
+$ kubectl run client --attach --rm --image docker.io/library/nginx --restart Never -- curl -sf http://server:8080/
 OUTPUT
 pod "client" deleted
 ~~~

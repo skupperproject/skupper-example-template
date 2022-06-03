@@ -23,7 +23,7 @@ steps:
       install the server.
     commands:
       private:
-        - run: kubectl create deployment server --image docker.io/library/nginx
+        - run: kubectl apply -f server/kubernetes.yaml
           output: deployment.apps/server created
   - title: Expose SERVER
     preamble: |
@@ -49,7 +49,7 @@ steps:
     commands:
       public:
         - await: service/server
-        - run: kubectl run client --attach --rm --image docker.io/curlimages/curl --restart Never -- -sf http://server:8080/
+        - run: kubectl run client --attach --rm --image docker.io/library/nginx --restart Never -- curl -sf http://server:8080/
           output: |
             OUTPUT
             pod "client" deleted
@@ -57,7 +57,7 @@ steps:
   - standard: cleaning_up
     commands:
       private:
-        - run: kubectl delete deployment/server
         - run: skupper delete
+        - run: kubectl delete -f server/kubernetes.yaml
       public:
         - run: skupper delete
