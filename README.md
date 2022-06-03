@@ -378,8 +378,8 @@ the following commands.
 _**Console for private:**_
 
 ~~~ shell
-kubectl delete deployment/server
 skupper delete
+kubectl delete -f server/kubernetes.yaml
 ~~~
 
 _**Console for public:**_
