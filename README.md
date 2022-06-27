@@ -2,7 +2,7 @@
 
 [![main](https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml/badge.svg)](https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml)
 
-#### Use public cloud resources to process data from a private SERVER
+#### Securely connect to SERVER on a remote Kubernetes cluster
 
 
 This example is part of a [suite of examples][examples] showing the
