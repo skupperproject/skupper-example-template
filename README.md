@@ -26,6 +26,7 @@ across cloud providers, data centers, and edge sites.
 * [Step 9: Run CLIENT](#step-9-run-client)
 * [Accessing the web console](#accessing-the-web-console)
 * [Cleaning up](#cleaning-up)
+* [About this example](#about-this-example)
 
 ## Overview
 
@@ -387,3 +388,17 @@ skupper delete
 ## Next steps
 
 Check out the other [examples][examples] on the Skupper website.
+
+## About this example
+
+This example was produced using [Skewer][skewer], a library for developing and
+testing Skupper examples.
+
+[skewer]: https://github.com/skupperproject/skewer
+
+Skewer provides some utilities for generating the README and running
+the example steps.  Use the `./plano` command in the project root to
+see what is available.
+
+To quickly stand up the example using Minikube, try the `./plano demo`
+command.
