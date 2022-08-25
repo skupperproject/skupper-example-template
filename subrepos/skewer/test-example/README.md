@@ -4,14 +4,12 @@
 
 #### A minimal HTTP application deployed across Kubernetes clusters using Skupper
 
-
 This example is part of a [suite of examples][examples] showing the
 different ways you can use [Skupper][website] to connect services
 across cloud providers, data centers, and edge sites.
 
 [website]: https://skupper.io/
 [examples]: https://skupper.io/examples/index.html
-
 
 #### Contents
 
@@ -29,7 +27,9 @@ across cloud providers, data centers, and edge sites.
 * [Step 10: Test the application](#step-10-test-the-application)
 * [Accessing the web console](#accessing-the-web-console)
 * [Cleaning up](#cleaning-up)
+* [Step 13: Fail on demand](#step-13-fail-on-demand)
 * [Summary](#summary)
+* [Next steps](#next-steps)
 
 ## Overview
 
@@ -53,19 +53,7 @@ services without exposing the backend to the public internet.
 
 ## Prerequisites
 
-
-* The `kubectl` command-line tool, version 1.15 or later
-  ([installation guide][install-kubectl])
-
-* The `skupper` command-line tool, the latest version ([installation
-  guide][install-skupper])
-
-* Access to at least one Kubernetes cluster, from any provider you
-  choose
-
-[install-kubectl]: https://kubernetes.io/docs/tasks/tools/install-kubectl/
-[install-skupper]: https://skupper.io/install/index.html
-
+Custom prerequisites
 
 ## Step 1: Configure separate console sessions
 
@@ -445,6 +433,15 @@ skupper delete
 kubectl delete deployment/backend
 ~~~
 
+## Step 13: Fail on demand
+
+_**Console for east:**_
+
+~~~ shell
+if [ -n "${SKEWER_FAIL}" ]; then expr 1 / 0; fi
+
+~~~
+
 ## Summary
 
 This example locates the frontend and backend services in different
@@ -467,5 +464,4 @@ the frontend.
 
 ## Next steps
 
-
-Check out the other [examples][examples] on the Skupper website.
+Custom next steps
