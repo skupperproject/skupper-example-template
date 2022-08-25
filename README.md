@@ -37,18 +37,15 @@ This example shows how you can use Skupper to access SERVER.
 * The `kubectl` command-line tool, version 1.15 or later
   ([installation guide][install-kubectl])
 
-* The `skupper` command-line tool, the latest version ([installation
-  guide][install-skupper])
-
-* Access to at least one Kubernetes cluster, from any provider you
-  choose
+* Access to at least one Kubernetes cluster, from [any provider you
+  choose][kube-providers]
 
 [install-kubectl]: https://kubernetes.io/docs/tasks/tools/install-kubectl/
-[install-skupper]: https://skupper.io/install/index.html
+[kube-providers]: https://skupper.io/start/index.html#prerequisites
 
 ## Step 1: Configure separate console sessions
 
-Skupper is designed for use with multiple namespaces, typically on
+Skupper is designed for use with multiple namespaces, usually on
 different clusters.  The `skupper` command uses your
 [kubeconfig][kubeconfig] and current context to select the
 namespace where it operates.
@@ -391,8 +388,8 @@ Check out the other [examples][examples] on the Skupper website.
 
 ## About this example
 
-This example was produced using [Skewer][skewer], a library for developing and
-testing Skupper examples.
+This example was produced using [Skewer][skewer], a library for
+documenting and testing Skupper examples.
 
 [skewer]: https://github.com/skupperproject/skewer
 
