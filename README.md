@@ -1,9 +1,8 @@
 # Accessing SERVER using Skupper
 
-[![main](https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml/badge.svg)](https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml)
+[![main](https://github.com/skupperproject/REPO/actions/workflows/main.yaml/badge.svg)](https://github.com/skupperproject/REPO/actions/workflows/main.yaml)
 
 #### Securely connect to SERVER on a remote Kubernetes cluster
-
 
 This example is part of a [suite of examples][examples] showing the
 different ways you can use [Skupper][website] to connect services
@@ -11,7 +10,6 @@ across cloud providers, data centers, and edge sites.
 
 [website]: https://skupper.io/
 [examples]: https://skupper.io/examples/index.html
-
 
 #### Contents
 
@@ -35,7 +33,6 @@ This example shows how you can use Skupper to access SERVER.
 
 ## Prerequisites
 
-
 * The `kubectl` command-line tool, version 1.15 or later
   ([installation guide][install-kubectl])
 
@@ -47,7 +44,6 @@ This example shows how you can use Skupper to access SERVER.
 
 [install-kubectl]: https://kubernetes.io/docs/tasks/tools/install-kubectl/
 [install-skupper]: https://skupper.io/install/index.html
-
 
 ## Step 1: Configure separate console sessions
 
@@ -389,6 +385,5 @@ skupper delete
 ~~~
 
 ## Next steps
-
 
 Check out the other [examples][examples] on the Skupper website.
