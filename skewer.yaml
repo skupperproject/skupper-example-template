@@ -1,15 +1,19 @@
 title: Accessing SERVER using Skupper
 subtitle: Securely connect to SERVER on a remote Kubernetes cluster
-github_actions_url: https://github.com/skupperproject/REPO/actions/workflows/main.yaml
-overview: |
-  This example shows how you can use Skupper to access SERVER.
+overview: This example shows how you can use Skupper to access SERVER.
 sites:
   public:
-    kubeconfig: ~/.kube/config-public
+    title: Public
+    platform: kubernetes
     namespace: public
+    env:
+      KUBECONFIG: ~/.kube/config-public
   private:
-    kubeconfig: ~/.kube/config-private
+    title: Private
+    platform: kubernetes
     namespace: private
+    env:
+      KUBECONFIG: ~/.kube/config-private
 steps:
   - standard: configure_separate_console_sessions
   - standard: access_your_clusters
@@ -34,11 +38,11 @@ steps:
       to check that the service appears after a moment.
     commands:
       private:
-        - await: deployment/server
+        - await_resource: deployment/server
         - run: skupper expose deployment/server --port 8080 --target-port 80
           output: deployment server exposed as server
       public:
-        - await: service/server
+        - await_resource: service/server
         - run: kubectl get service/server
           output: |
             NAME     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
@@ -48,7 +52,7 @@ steps:
       In the public namespace, use `kubectl run` to run CLIENT.
     commands:
       public:
-        - await: service/server
+        - await_resource: service/server
         - run: kubectl run client --attach --rm --image docker.io/library/nginx --restart Never -- curl -sf http://server:8080/
           output: |
             OUTPUT
