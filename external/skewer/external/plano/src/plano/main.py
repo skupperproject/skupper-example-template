@@ -74,22 +74,21 @@ PLANO_COLOR = "PLANO_COLOR" in ENV
 ## Archive operations
 
 def make_archive(input_dir, output_file=None, quiet=False):
-    """
-    group: archive_operations
-    """
-
     check_program("tar")
 
     archive_stem = get_base_name(input_dir)
 
     if output_file is None:
-        output_file = "{}.tar.gz".format(join(get_current_dir(), archive_stem))
+        # tar on Windows needs this
+        base = join(get_current_dir(), archive_stem)
+        base = base.replace("\\", "/")
+
+        output_file = f"{base}.tar.gz"
 
     _notice(quiet, "Making archive {} from directory {}", repr(output_file), repr(input_dir))
 
-    with working_dir(get_parent_dir(input_dir)):
-        run("tar -czf temp.tar.gz {}".format(archive_stem))
-        move("temp.tar.gz", output_file)
+    with working_dir(get_parent_dir(input_dir), quiet=True):
+        run(f"tar -czf {output_file} {archive_stem}", quiet=True)
 
     return output_file
 
@@ -103,13 +102,11 @@ def extract_archive(input_file, output_dir=None, quiet=False):
 
     input_file = get_absolute_path(input_file)
 
-    with working_dir(output_dir):
-        copy(input_file, "temp.tar.gz")
+    # tar on Windows needs this
+    input_file = input_file.replace("\\", "/")
 
-        try:
-            run("tar -xf temp.tar.gz")
-        finally:
-            remove("temp.tar.gz")
+    with working_dir(output_dir, quiet=True):
+        run(f"tar -xf {input_file}", quiet=True)
 
     return output_dir
 
@@ -119,17 +116,20 @@ def rename_archive(input_file, new_archive_stem, quiet=False):
     output_dir = get_absolute_path(get_parent_dir(input_file))
     output_file = "{}.tar.gz".format(join(output_dir, new_archive_stem))
 
+    # tar on Windows needs this
+    output_file = output_file.replace("\\", "/")
+
     input_file = get_absolute_path(input_file)
 
-    with working_dir():
-        extract_archive(input_file)
+    with working_dir(quiet=True):
+        extract_archive(input_file, quiet=True)
 
         input_name = list_dir()[0]
-        input_dir = move(input_name, new_archive_stem)
+        input_dir = move(input_name, new_archive_stem, quiet=True)
 
-        make_archive(input_dir, output_file=output_file)
+        make_archive(input_dir, output_file=output_file, quiet=True)
 
-    remove(input_file)
+    remove(input_file, quiet=True)
 
     return output_file
 
@@ -543,6 +543,36 @@ def move(from_path, to_path, inside=True, quiet=False):
 
     return to_path
 
+def replace(path, replacement, quiet=False):
+    path = expand(path)
+    replacement = expand(replacement)
+
+    _notice(quiet, "Replacing {} with {}", repr(path), repr(replacement))
+
+    with temp_dir() as backup_dir:
+        backup = join(backup_dir, "backup")
+        backup_created = False
+
+        if exists(path):
+            move(path, backup, quiet=True)
+            backup_created = True
+
+        try:
+            move(replacement, path, quiet=True)
+        except OSError:
+            notice("Removing")
+            remove(path, quiet=True)
+
+            if backup_created:
+                move(backup, path, quiet=True)
+
+            raise
+
+        assert not exists(replacement), replacement
+        assert exists(path), path
+
+    return path
+
 def remove(paths, quiet=False):
     if is_string(paths):
         paths = (paths,)
@@ -649,9 +679,9 @@ def tail_lines(file, count):
 
     return lines[-count:]
 
-def replace_in_file(file, expr, replacement, count=0):
+def string_replace_file(file, expr, replacement, count=0):
     file = expand(file)
-    return write(file, replace(read(file), expr, replacement, count=count))
+    return write(file, string_replace(read(file), expr, replacement, count=count))
 
 def concatenate(file, input_files):
     file = expand(file)
@@ -717,8 +747,10 @@ def print_json(data, **kwargs):
 ## HTTP operations
 
 def _run_curl(method, url, content=None, content_file=None, content_type=None, output_file=None, insecure=False,
-              user=None, password=None):
+              user=None, password=None, quiet=False):
     check_program("curl")
+
+    _notice(quiet, f"Sending {method} request to '{url}'")
 
     args = ["curl", "-sfL"]
 
@@ -760,33 +792,37 @@ def _run_curl(method, url, content=None, content_file=None, content_type=None, o
     if output_file is None:
         return proc.stdout_result
 
-def http_get(url, output_file=None, insecure=False, user=None, password=None):
-    return _run_curl("GET", url, output_file=output_file, insecure=insecure, user=user, password=password)
+def http_get(url, output_file=None, insecure=False, user=None, password=None, quiet=False):
+    return _run_curl("GET", url, output_file=output_file, insecure=insecure, user=user, password=password, quiet=quiet)
 
-def http_get_json(url, insecure=False, user=None, password=None):
-    return parse_json(http_get(url, insecure=insecure, user=user, password=password))
+def http_get_json(url, insecure=False, user=None, password=None, quiet=False):
+    return parse_json(http_get(url, insecure=insecure, user=user, password=password, quiet=quiet))
 
-def http_put(url, content, content_type=None, insecure=False, user=None, password=None):
-    _run_curl("PUT", url, content=content, content_type=content_type, insecure=insecure, user=user, password=password)
+def http_put(url, content, content_type=None, insecure=False, user=None, password=None, quiet=False):
+    _run_curl("PUT", url, content=content, content_type=content_type, insecure=insecure, user=user, password=password,
+              quiet=quiet)
 
-def http_put_file(url, content_file, content_type=None, insecure=False, user=None, password=None):
+def http_put_file(url, content_file, content_type=None, insecure=False, user=None, password=None, quiet=False):
     _run_curl("PUT", url, content_file=content_file, content_type=content_type, insecure=insecure, user=user,
-              password=password)
+              password=password, quiet=quiet)
 
-def http_put_json(url, data, insecure=False, user=None, password=None):
-    http_put(url, emit_json(data), content_type="application/json", insecure=insecure, user=user, password=password)
+def http_put_json(url, data, insecure=False, user=None, password=None, quiet=False):
+    http_put(url, emit_json(data), content_type="application/json", insecure=insecure, user=user, password=password,
+             quiet=quiet)
 
-def http_post(url, content, content_type=None, output_file=None, insecure=False, user=None, password=None):
+def http_post(url, content, content_type=None, output_file=None, insecure=False, user=None, password=None,
+              quiet=False):
     return _run_curl("POST", url, content=content, content_type=content_type, output_file=output_file,
-                     insecure=insecure, user=user, password=password)
+                     insecure=insecure, user=user, password=password, quiet=quiet)
 
-def http_post_file(url, content_file, content_type=None, output_file=None, insecure=False, user=None, password=None):
+def http_post_file(url, content_file, content_type=None, output_file=None, insecure=False, user=None, password=None,
+                   quiet=False):
     return _run_curl("POST", url, content_file=content_file, content_type=content_type, output_file=output_file,
-                     insecure=insecure, user=user, password=password)
+                     insecure=insecure, user=user, password=password, quiet=quiet)
 
-def http_post_json(url, data, insecure=False, user=None, password=None):
+def http_post_json(url, data, insecure=False, user=None, password=None, quiet=False):
     return parse_json(http_post(url, emit_json(data), content_type="application/json", insecure=insecure, user=user,
-                                password=password))
+                                password=password, quiet=quiet))
 
 ## Link operations
 
@@ -1381,7 +1417,7 @@ _signal.signal(_signal.SIGTERM, _default_sigterm_handler)
 
 ## String operations
 
-def replace(string, expr, replacement, count=0):
+def string_replace(string, expr, replacement, count=0):
     return _re.sub(expr, replacement, string, count)
 
 def remove_prefix(string, prefix):
