@@ -15,10 +15,10 @@ sites:
     env:
       KUBECONFIG: ~/.kube/config-private
 steps:
-  - standard: install_the_skupper_command_line_tool
+  - standard: general/install_the_skupper_command_line_tool
   - standard: kubernetes/set_up_your_namespaces
   - standard: kubernetes/create_your_sites
-  - standard: link_your_sites
+  - standard: kubernetes/link_your_sites
   - title: Deploy SERVER
     preamble: |
       In the private namespace, use the `kubectl apply` command to
@@ -55,7 +55,7 @@ steps:
           output: |
             OUTPUT
             pod "client" deleted
-  - standard: cleaning_up
+  - standard: general/cleaning_up
     commands:
       private:
         - run: skupper delete

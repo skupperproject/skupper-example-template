@@ -1,3 +1,5 @@
+<!-- NOTE: This file is generated from skewer.yaml.  Do not edit it directly. -->
+
 # Accessing SERVER using Skupper
 
 [![main](https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml/badge.svg)](https://github.com/skupperproject/skupper-example-template/actions/workflows/main.yaml)
@@ -143,10 +145,10 @@ _Sample output:_
 $ skupper init
 Waiting for LoadBalancer IP or hostname...
 Waiting for status...
-Skupper is now installed in namespace 'west'.  Use 'skupper status' to get more information.
+Skupper is now installed in namespace 'public'.  Use 'skupper status' to get more information.
 
 $ skupper status
-Skupper is enabled for namespace "west". It is not connected to any other sites. It has no exposed services.
+Skupper is enabled for namespace "public". It is not connected to any other sites. It has no exposed services.
 ~~~
 
 _**Private:**_
@@ -162,16 +164,20 @@ _Sample output:_
 $ skupper init
 Waiting for LoadBalancer IP or hostname...
 Waiting for status...
-Skupper is now installed in namespace 'east'.  Use 'skupper status' to get more information.
+Skupper is now installed in namespace 'private'.  Use 'skupper status' to get more information.
 
 $ skupper status
-Skupper is enabled for namespace "east". It is not connected to any other sites. It has no exposed services.
+Skupper is enabled for namespace "private". It is not connected to any other sites. It has no exposed services.
 ~~~
 
 As you move through the steps below, you can use `skupper status` at
 any time to check your progress.
 
 ## Step 4: Link your sites
+
+A Skupper _link_ is a channel for communication between two sites.
+Links serve as a transport for application connections and
+requests.
 
 Creating a link requires use of two `skupper` commands in
 conjunction, `skupper token create` and `skupper link create`.

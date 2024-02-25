@@ -309,8 +309,11 @@ def generate_readme(skewer_file, output_file):
 
         out.append(f"## {heading}")
         out.append("")
-        out.append(text.strip())
+        out.append(text)
         out.append("")
+
+    out.append("<!-- NOTE: This file is generated from skewer.yaml.  Do not edit it directly. -->")
+    out.append("")
 
     out.append(f"# {model.title}")
     out.append("")
@@ -352,7 +355,7 @@ def generate_readme(skewer_file, output_file):
 
     append_section("Summary", model.summary)
     append_section("Next steps", model.next_steps)
-    append_section("About this example", standard_text["about_this_example"].strip())
+    append_section("About this example", model.about_this_example)
 
     write(output_file, "\n".join(out).strip() + "\n")
 
@@ -427,17 +430,22 @@ def apply_standard_steps(model):
         del step.data["standard"]
 
         def apply_attribute(name, default=None):
-            if name not in step.data:
-                value = standard_step_data.get(name, default)
+            standard_value = standard_step_data.get(name, default)
+            value = step.data.get(name, standard_value)
 
-                if value and name in ("title", "preamble", "postamble"):
-                    for i, site in enumerate([x for _, x in model.sites]):
-                        value = value.replace(f"@site{i}@", site.title)
+            if is_string(value):
+                if standard_value is not None:
+                    value = value.replace("@default@", str(nvl(standard_value, "")).strip())
 
-                        if site.namespace:
-                            value = value.replace(f"@namespace{i}@", site.namespace)
+                for i, site in enumerate([x for _, x in model.sites]):
+                    value = value.replace(f"@site{i}@", site.title)
 
-                step.data[name] = value
+                    if site.namespace:
+                        value = value.replace(f"@namespace{i}@", site.namespace)
+
+                value = value.strip()
+
+            step.data[name] = value
 
         apply_attribute("name")
         apply_attribute("title")
@@ -513,7 +521,13 @@ def get_github_owner_repo():
 
 def object_property(name, default=None):
     def get(obj):
-        return obj.data.get(name, default)
+        value = obj.data.get(name, default)
+
+        if is_string(value):
+            value = value.replace("@default@", str(nvl(default, "")).strip())
+            value = value.strip()
+
+        return value
 
     return property(get)
 
@@ -534,9 +548,10 @@ class Model:
     subtitle = object_property("subtitle")
     workflow = object_property("workflow", "main.yaml")
     overview = object_property("overview")
-    prerequisites = object_property("prerequisites", standard_text["prerequisites"].strip())
+    prerequisites = object_property("prerequisites", standard_text["prerequisites"])
     summary = object_property("summary")
-    next_steps = object_property("next_steps", standard_text["next_steps"].strip())
+    next_steps = object_property("next_steps", standard_text["next_steps"])
+    about_this_example = object_property("about_this_example", standard_text["about_this_example"])
 
     def __init__(self, skewer_file, kubeconfigs=[]):
         self.skewer_file = skewer_file
