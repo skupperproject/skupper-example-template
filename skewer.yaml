@@ -16,24 +16,24 @@ sites:
       KUBECONFIG: ~/.kube/config-private
 steps:
   - standard: general/install_the_skupper_command_line_tool
-  - standard: kubernetes/set_up_your_namespaces
-  - standard: kubernetes/create_your_sites
-  - standard: kubernetes/link_your_sites
+  - standard: kubernetes/set_up_your_clusters
   - title: Deploy SERVER
     preamble: |
-      In the private namespace, use the `kubectl apply` command to
-      install the server.
+      In Private, use the `kubectl apply` command to install the
+      server.
     commands:
       private:
         - run: kubectl apply -f server/kubernetes.yaml
           output: deployment.apps/server created
+  - standard: kubernetes/create_your_sites
+  - standard: kubernetes/link_your_sites
   - title: Expose SERVER
     preamble: |
-      In the private namespace, use `skupper expose` to expose SERVER
-      on the Skupper network.
+      In Private, use `skupper expose` to expose SERVER on the Skupper
+      network.
 
-      Then, in the public namespace, use `kubectl get service/server`
-      to check that the service appears after a moment.
+      Then, in Public, use `kubectl get service/server` to check that
+      the service appears after a moment.
     commands:
       private:
         - await_resource: deployment/server
@@ -47,7 +47,7 @@ steps:
             server   ClusterIP   10.100.58.95   <none>        8080/TCP   2s
   - title: Run CLIENT
     preamble: |
-      In the public namespace, use `kubectl run` to run CLIENT.
+      In Public, use `kubectl run` to run CLIENT.
     commands:
       public:
         - await_resource: service/server
@@ -55,7 +55,7 @@ steps:
           output: |
             OUTPUT
             pod "client" deleted
-  - standard: general/cleaning_up
+  - standard: kubernetes/cleaning_up
     commands:
       private:
         - run: skupper delete

@@ -8,6 +8,14 @@ A `skewer.yaml` file describes the steps and commands to achieve an
 objective using Skupper.  Skewer takes the `skewer.yaml` file as input
 and produces two outputs: a `README.md` file and a test routine.
 
+#### Contents
+
+* [An example example](#an-example-example)
+* [Setting up Skewer for your own example](#setting-up-skewer-for-your-own-example)
+* [Skewer YAML](#skewer-yaml)
+* [Standard steps](#standard-steps)
+* [Demo mode](#demo-mode)
+
 ## An example example
 
 [Example `skewer.yaml` file](example/skewer.yaml)
@@ -89,7 +97,7 @@ commands:
 
 ## Skewer YAML
 
-The top level:
+The top level of the `skewer.yaml` file:
 
 ~~~ yaml
 title:              # Your example's title (required)
@@ -103,7 +111,18 @@ summary:            # Text to summarize what the user did (optional)
 next_steps:         # Text linking to more examples (optional, has default text)
 ~~~
 
-To disable the GitHub workflow, set it to `null`.
+For fields with default text such as `prerequisites` and `next_steps`,
+you can include the default text inside your custom text by using the
+`@default@` placeholder:
+
+~~~ yaml
+next_steps:
+    @default@
+
+    This Way to the Egress.
+~~~
+
+To disable the GitHub workflow and CI badge, set `workflow` to `null`.
 
 A **site**:
 
@@ -167,93 +186,25 @@ steps:
       west: <list-of-commands>
 ~~~
 
-Or you can use a named step from the library of standard steps:
-
-~~~ yaml
-- standard: configure_separate_console_sessions
-~~~
-
-The standard steps are defined in
-[python/skewer/standardsteps.yaml](python/skewer/standardsteps.yaml).
-They are the following:
-
-~~~
-general/install_the_skupper_command_line_tool
-general/link_your_sites
-general/access_the_frontend
-general/cleaning_up
-kubernetes/set_up_your_namespaces
-kubernetes/set_up_your_kubernetes_namespace  # One namespace only
-kubernetes/create_your_sites
-kubernetes/link_your_sites
-podman/set_up_your_podman_network
-hello_world/deploy_the_frontend_and_backend
-hello_world/expose_the_backend
-hello_world/access_the_frontend
-hello_world/cleaning_up
-~~~
-
-The `general` steps are generic (or pretty generic) with respect to
-platform and application.  The `kubernetes` and `podman` steps are
-coupled to their platform.  The `hello_world` steps are coupled to the
-Skupper Hello World app.
-
-**Note:** The `general/link_your_sites` and `general/cleaning_up`
-steps are less generic than the other `general` steps.  For example,
-`general/cleaning_up` doesn't delete any application workoads.  Check
-that the text and commands these steps produce are doing what you need
-for your example.  If not, you need to provide a custom step.
-
-You can create custom steps based on the standard steps by overriding
-the `title`, `preamble`, `commands`, or `postamble` fields.
-
-~~~ yaml
-- standard: general/cleaning_up
-  commands:
-    east:
-     - run: skupper delete
-     - run: kubectl delete deployment/database
-    west:
-     - run: skupper delete
-~~~
-
-For string fields such as `preamble` and `postamble`, you can include
-the standard text inside your custom text by using the `@default@`
-placeholder:
-
-~~~ yaml
-- standard: general/cleaning_up
-  preamble: |
-    @default@
-
-    Note: You may also want to flirp your krupke.
-~~~
-
-A typical mix of standard and custom steps might look like this:
-
-~~~ yaml
-steps:
-  - standard: general/install_the_skupper_command_line_tool
-  - standard: kubernetes/set_up_your_namespaces
-  <your-custom-deploy-step>
-  - standard: kubernetes/create_your_sites
-  - standard: kubernetes/link_your_sites
-  <your-custom-expose-step>
-  <your-custom-access-step>
-  - standard: general/cleaning_up
-~~~
-
 The step commands are separated into named groups corresponding to the
 sites.  Each named group contains a list of command entries.  Each
 command entry has a `run` field containing a shell command and other
 fields for awaiting completion or providing sample output.
 
+You can also use a named step from the library of [standard
+steps](#standard-steps):
+
+~~~ yaml
+- standard: kubernetes/set_up_your_clusters
+~~~
+
 A **command**:
 
 ~~~ yaml
 - run:              # A shell command (required)
-  apply:            # Use this command only for "readme" or "test" (optional, default is both)
+  apply:            # Use this command only for "readme" or "test" (default is both)
   output:           # Sample output to include in the README (optional)
+  expect_failure:   # If true, check that the command fails and keep going (default false)
 ~~~
 
 Only the `run` and `output` fields are used in the README content.
@@ -291,6 +242,83 @@ commands:
       output: |
         NAME          TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)         AGE
         backend       ClusterIP      10.102.112.121   <none>           8080/TCP        30s
+~~~
+
+## Standard steps
+
+Skewer includes a library of standard steps with descriptive text and
+commands that we use a lot for our examples.
+
+The standard steps are defined in
+[python/skewer/standardsteps.yaml](python/skewer/standardsteps.yaml).
+They are the following:
+
+~~~
+general/install_the_skupper_command_line_tool
+general/link_your_sites
+general/cleaning_up
+kubernetes/set_up_your_clusters
+kubernetes/set_up_your_kubernetes_cluster  # One cluster only
+kubernetes/create_your_sites
+kubernetes/link_your_sites
+kubernetes/access_the_frontend
+kubernetes/cleaning_up
+podman/set_up_your_podman_environment
+hello_world/deploy_the_frontend_and_backend
+hello_world/expose_the_backend
+hello_world/access_the_frontend
+hello_world/cleaning_up
+~~~
+
+The `general` steps are generic (or pretty generic) with respect to
+platform and application.  The `kubernetes` and `podman` steps are
+coupled to their platform.  The `hello_world` steps are specific to
+the Skupper Hello World application.
+
+**Note:** The `link_your_sites` and `cleaning_up` steps are less
+generic than the other `general` steps.  For example, `cleaning_up`
+doesn't delete any application workoads.  Check that the text and
+commands these steps produce are doing what you need for your example.
+If not, you need to provide a custom step.
+
+You can create custom steps based on the standard steps by overriding
+the `title`, `preamble`, `commands`, or `postamble` fields.
+
+~~~ yaml
+- standard: kubernetes/cleaning_up
+  commands:
+    east:
+     - run: skupper delete
+     - run: kubectl delete deployment/database
+    west:
+     - run: skupper delete
+~~~
+
+For string fields such as `preamble` and `postamble`, you can include
+the standard text inside your custom text by using the `@default@`
+placeholder:
+
+~~~ yaml
+- standard: general/cleaning_up
+  preamble: |
+    @default@
+
+    Note: You may also want to flirp your krupke.
+~~~
+
+A typical mix of standard and custom steps for a Kubernetes-based
+example might look like this:
+
+~~~ yaml
+steps:
+  - standard: general/install_the_skupper_command_line_tool
+  - standard: kubernetes/set_up_your_clusters
+  <your-custom-deploy-step>
+  - standard: kubernetes/create_your_sites
+  - standard: kubernetes/link_your_sites
+  <your-custom-expose-step>
+  <your-custom-access-step>
+  - standard: kubernetes/cleaning_up
 ~~~
 
 ## Demo mode
