@@ -18,10 +18,10 @@ across cloud providers, data centers, and edge sites.
 * [Overview](#overview)
 * [Prerequisites](#prerequisites)
 * [Step 1: Install the Skupper command-line tool](#step-1-install-the-skupper-command-line-tool)
-* [Step 2: Set up your namespaces](#step-2-set-up-your-namespaces)
-* [Step 3: Create your sites](#step-3-create-your-sites)
-* [Step 4: Link your sites](#step-4-link-your-sites)
-* [Step 5: Deploy SERVER](#step-5-deploy-server)
+* [Step 2: Set up your clusters](#step-2-set-up-your-clusters)
+* [Step 3: Deploy SERVER](#step-3-deploy-server)
+* [Step 4: Create your sites](#step-4-create-your-sites)
+* [Step 5: Link your sites](#step-5-link-your-sites)
 * [Step 6: Expose SERVER](#step-6-expose-server)
 * [Step 7: Run CLIENT](#step-7-run-client)
 * [Cleaning up](#cleaning-up)
@@ -66,12 +66,12 @@ Skupper][install-docs].
 [install-script]: https://github.com/skupperproject/skupper-website/blob/main/input/install.sh
 [install-docs]: https://skupper.io/install/
 
-## Step 2: Set up your namespaces
+## Step 2: Set up your clusters
 
-Skupper is designed for use with multiple Kubernetes namespaces,
-usually on different clusters.  The `skupper` and `kubectl`
-commands use your [kubeconfig][kubeconfig] and current context to
-select the namespace where they operate.
+Skupper is designed for use with multiple Kubernetes clusters.
+The `skupper` and `kubectl` commands use your
+[kubeconfig][kubeconfig] and current context to select the cluster
+and namespace where they operate.
 
 [kubeconfig]: https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/
 
@@ -116,7 +116,25 @@ kubectl create namespace private
 kubectl config set-context --current --namespace private
 ~~~
 
-## Step 3: Create your sites
+## Step 3: Deploy SERVER
+
+In Private, use the `kubectl apply` command to install the
+server.
+
+_**Private:**_
+
+~~~ shell
+kubectl apply -f server/kubernetes.yaml
+~~~
+
+_Sample output:_
+
+~~~ console
+$ kubectl apply -f server/kubernetes.yaml
+deployment.apps/server created
+~~~
+
+## Step 4: Create your sites
 
 A Skupper _site_ is a location where components of your
 application are running.  Sites are linked together to form a
@@ -173,7 +191,7 @@ Skupper is enabled for namespace "private". It is not connected to any other sit
 As you move through the steps below, you can use `skupper status` at
 any time to check your progress.
 
-## Step 4: Link your sites
+## Step 5: Link your sites
 
 A Skupper _link_ is a channel for communication between two sites.
 Links serve as a transport for application connections and
@@ -192,9 +210,9 @@ that generated it.
 token can link to your site.  Make sure that only those you trust
 have access to it.
 
-First, use `skupper token create` in site Public to generate the
-token.  Then, use `skupper link create` in site Private to link
-the sites.
+First, use `skupper token create` in Public to generate the
+token.  Then, use `skupper link create` in Private to link the
+sites.
 
 _**Public:**_
 
@@ -228,31 +246,13 @@ to use `scp` or a similar tool to transfer the token securely.  By
 default, tokens expire after a single use or 15 minutes after
 creation.
 
-## Step 5: Deploy SERVER
-
-In the private namespace, use the `kubectl apply` command to
-install the server.
-
-_**Private:**_
-
-~~~ shell
-kubectl apply -f server/kubernetes.yaml
-~~~
-
-_Sample output:_
-
-~~~ console
-$ kubectl apply -f server/kubernetes.yaml
-deployment.apps/server created
-~~~
-
 ## Step 6: Expose SERVER
 
-In the private namespace, use `skupper expose` to expose SERVER
-on the Skupper network.
+In Private, use `skupper expose` to expose SERVER on the Skupper
+network.
 
-Then, in the public namespace, use `kubectl get service/server`
-to check that the service appears after a moment.
+Then, in Public, use `kubectl get service/server` to check that
+the service appears after a moment.
 
 _**Private:**_
 
@@ -283,7 +283,7 @@ server   ClusterIP   10.100.58.95   <none>        8080/TCP   2s
 
 ## Step 7: Run CLIENT
 
-In the public namespace, use `kubectl run` to run CLIENT.
+In Public, use `kubectl run` to run CLIENT.
 
 _**Public:**_
 
